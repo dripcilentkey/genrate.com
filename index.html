@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DRIPCILENT</title>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+body{
+font-family:'Segoe UI',sans-serif;
+background:#0b0014;
+overflow:hidden;
+color:white;
+text-align:center;
+}
+
+/* MATRIX */
+
+canvas{
+position:fixed;
+top:0;
+left:0;
+z-index:0;
+}
+
+/* PARTICLES */
+
+.particle{
+position:absolute;
+width:4px;
+height:4px;
+background:#d580ff;
+border-radius:50%;
+animation:float 10s linear infinite;
+opacity:0.5;
+}
+
+@keyframes float{
+0%{
+transform:translateY(100vh) scale(0);
+}
+100%{
+transform:translateY(-100vh) scale(1);
+}
+}
+
+/* CONTAINER */
+
+.container{
+position:relative;
+z-index:2;
+padding-top:40px;
+}
+
+/* LOGO */
+
+.logo{
+font-size:42px;
+font-weight:bold;
+letter-spacing:3px;
+color:#d580ff;
+text-shadow:
+0 0 10px #d580ff,
+0 0 20px #a64dff,
+0 0 40px #7a00ff;
+animation:glow 2s infinite alternate;
+}
+
+@keyframes glow{
+from{
+text-shadow:
+0 0 10px #d580ff,
+0 0 20px #a64dff;
+}
+to{
+text-shadow:
+0 0 20px #ff00ff,
+0 0 40px #7a00ff,
+0 0 60px #d580ff;
+}
+}
+
+.sub{
+margin-top:5px;
+color:#aaa;
+font-size:14px;
+}
+
+.live{
+margin-top:15px;
+color:#00ffcc;
+font-weight:bold;
+animation:pulse 1s infinite;
+}
+
+@keyframes pulse{
+0%{opacity:0.5;}
+50%{opacity:1;}
+100%{opacity:0.5;}
+}
+
+/* CARD */
+
+.card{
+width:92%;
+max-width:420px;
+margin:30px auto;
+padding:25px;
+border-radius:25px;
+background:rgba(255,255,255,0.05);
+backdrop-filter:blur(15px);
+border:1px solid rgba(255,255,255,0.1);
+box-shadow:
+0 0 25px rgba(162,0,255,0.5),
+0 0 50px rgba(162,0,255,0.2);
+position:relative;
+overflow:hidden;
+}
+
+.card::before{
+content:'';
+position:absolute;
+top:-50%;
+left:-50%;
+width:200%;
+height:200%;
+background:linear-gradient(
+0deg,
+transparent,
+transparent,
+#d580ff,
+transparent,
+transparent
+);
+animation:rotate 6s linear infinite;
+}
+
+.card::after{
+content:'';
+position:absolute;
+inset:3px;
+background:#12001f;
+border-radius:22px;
+z-index:0;
+}
+
+.card-content{
+position:relative;
+z-index:2;
+}
+
+@keyframes rotate{
+100%{
+transform:rotate(360deg);
+}
+}
+
+h2{
+margin-bottom:15px;
+}
+
+#daysText{
+margin-top:10px;
+color:#ccc;
+}
+
+/* SLIDER */
+
+input[type=range]{
+width:100%;
+margin-top:15px;
+accent-color:#d580ff;
+}
+
+/* BUTTONS */
+
+.gen-btn,.tg-btn{
+width:100%;
+padding:15px;
+border:none;
+border-radius:20px;
+margin-top:15px;
+font-size:16px;
+font-weight:bold;
+cursor:pointer;
+transition:0.3s;
+background:linear-gradient(90deg,#7a00ff,#d580ff);
+color:white;
+box-shadow:0 0 20px #a64dff;
+}
+
+.gen-btn:hover,.tg-btn:hover{
+transform:scale(1.03);
+}
+
+.gen-btn:active{
+transform:scale(0.95);
+}
+
+/* KEY BOX */
+
+#keyBox{
+margin-top:20px;
+padding:15px;
+border-radius:15px;
+background:rgba(0,0,0,0.4);
+min-height:130px;
+overflow:hidden;
+}
+
+.key{
+margin:8px 0;
+color:#00ffcc;
+font-size:14px;
+animation:typing 0.4s;
+letter-spacing:1px;
+word-break:break-word;
+}
+
+@keyframes typing{
+from{
+opacity:0;
+transform:translateX(-20px);
+}
+to{
+opacity:1;
+transform:translateX(0);
+}
+}
+
+/* TIMER */
+
+#timer{
+margin-top:15px;
+font-size:18px;
+color:#ff66ff;
+font-weight:bold;
+}
+
+/* PROGRESS */
+
+.progress{
+width:100%;
+height:8px;
+background:#222;
+border-radius:10px;
+overflow:hidden;
+margin-top:15px;
+display:none;
+}
+
+.progress-bar{
+height:100%;
+width:0%;
+background:linear-gradient(90deg,#7a00ff,#00ffcc);
+transition:0.3s;
+}
+
+/* WARNING */
+
+.warning{
+margin-top:15px;
+color:#ff4444;
+font-size:13px;
+}
+
+/* OWNER */
+
+.owner{
+margin-top:20px;
+font-size:12px;
+color:#999;
+}
+
+/* POPUP */
+
+.popup{
+position:fixed;
+top:20px;
+right:-400px;
+background:#180028;
+padding:15px 25px;
+border-radius:15px;
+box-shadow:0 0 20px #a64dff;
+transition:0.5s;
+z-index:999;
+font-weight:bold;
+}
+
+.popup.show{
+right:20px;
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- MATRIX -->
+<canvas id="matrix"></canvas>
+
+<!-- POPUP -->
+<div class="popup" id="popup">
+🔥 LIMITED ACCESS ENABLED
+</div>
+
+<div class="container">
+
+<div class="logo">DRIPCILENT</div>
+
+<div class="sub">CRACKED VERSION</div>
+<div class="sub">WELCOME TO MAFIA X PANEL</div>
+
+<div class="live">
+🟢 SERVER ONLINE • 🔥 128 USERS GENERATING
+</div>
+
+<div class="card"><div class="card-content">
+
+<h2>🔑 GENERATE PREMIUM KEY</h2>
+
+<p id="daysText">Duration: 1 day</p>
+
+<input type="range" min="0" max="4" value="0" id="slider">
+
+<button class="tg-btn" onclick="joinTG()">
+JOIN TELEGRAM
+</button>
+
+<button class="gen-btn" onclick="generate()">
+GENERATE KEY
+</button>
+
+<div id="keyBox">
+Waiting For Generate...
+</div>
+
+<div class="progress" id="progress">
+<div class="progress-bar" id="bar"></div>
+</div>
+
+<div id="timer"></div>
+
+<div class="warning">
+⚠ ONLY 3 KEYS CAN BE GENERATED
+</div>
+
+<div class="owner">
+OWNER ACCESS • CREDITS : MAFIA X
+</div>
+
+</div>
+</div>
+</div>
+
+<!-- SOUNDS -->
+
+<audio id="genSound">
+<source src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3" type="audio/mpeg">
+</audio>
+
+<audio id="doneSound">
+<source src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+
+/* MATRIX EFFECT */
+
+const canvas = document.getElementById("matrix");
+const ctx = canvas.getContext("2d");
+
+canvas.height = window.innerHeight;
+canvas.width = window.innerWidth;
+
+let letters = "01DRIPCILENTMAFIAX";
+letters = letters.split("");
+
+let fontSize = 14;
+let columns = canvas.width/fontSize;
+
+let drops = [];
+
+for(let x=0;x<columns;x++){
+drops[x]=1;
+}
+
+function draw(){
+
+ctx.fillStyle="rgba(0,0,0,0.05)";
+ctx.fillRect(0,0,canvas.width,canvas.height);
+
+ctx.fillStyle="#d580ff";
+ctx.font=fontSize+"px monospace";
+
+for(let i=0;i<drops.length;i++){
+
+let text=letters[Math.floor(Math.random()*letters.length)];
+
+ctx.fillText(text,i*fontSize,drops[i]*fontSize);
+
+if(drops[i]*fontSize>canvas.height && Math.random()>0.975){
+drops[i]=0;
+}
+
+drops[i]++;
+}
+}
+
+setInterval(draw,35);
+
+/* RESIZE FIX */
+
+window.addEventListener("resize", () => {
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+});
+
+/* PARTICLES */
+
+for(let i=0;i<40;i++){
+
+let p=document.createElement("div");
+
+p.className="particle";
+
+p.style.left=Math.random()*100+"%";
+p.style.animationDuration=(5+Math.random()*10)+"s";
+p.style.opacity=Math.random();
+
+document.body.appendChild(p);
+}
+
+/* SLIDER */
+
+let slider=document.getElementById("slider");
+let daysText=document.getElementById("daysText");
+
+let days=[1,3,7,15,30];
+
+slider.oninput=function(){
+daysText.innerText="Duration: "+days[this.value]+" days";
+}
+
+/* TELEGRAM */
+
+function joinTG(){
+window.location.href="https://t.me/+psULB0ldEwMxZThl";
+}
+
+/* UNIQUE KEYS */
+
+let usedKeys=[];
+
+function randomKey(){
+
+let chars="ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+let result="DRIPCILENT-";
+
+for(let i=0;i<10;i++){
+result += chars.charAt(Math.floor(Math.random()*chars.length));
+}
+
+if(usedKeys.includes(result)){
+return randomKey();
+}
+
+usedKeys.push(result);
+
+return result;
+}
+
+/* GENERATE */
+
+function generate(){
+
+document.getElementById("genSound").play();
+
+navigator.vibrate?.(200);
+
+let keyBox=document.getElementById("keyBox");
+let timer=document.getElementById("timer");
+let progress=document.getElementById("progress");
+let bar=document.getElementById("bar");
+
+keyBox.innerHTML="";
+timer.innerHTML="";
+progress.style.display="block";
+bar.style.width="0%";
+
+let count=0;
+
+let gen=setInterval(()=>{
+
+if(count>=3){
+
+clearInterval(gen);
+
+let sec=3;
+
+timer.innerHTML="⏳ Redirecting To Private Telegram... "+sec+"s";
+
+let load=0;
+
+let wait=setInterval(()=>{
+
+sec--;
+
+load+=34;
+
+bar.style.width=load+"%";
+
+timer.innerHTML="⏳ Redirecting To Private Telegram... "+sec+"s";
+
+if(sec<=0){
+
+clearInterval(wait);
+
+document.getElementById("doneSound").play();
+
+window.location.href="https://t.me/+psULB0ldEwMxZThl";
+
+}
+
+},1000);
+
+return;
+}
+
+let key=randomKey();
+
+let div=document.createElement("div");
+
+div.className="key";
+
+div.innerHTML="✅ "+key;
+
+keyBox.appendChild(div);
+
+count++;
+
+},2000);
+}
+
+/* POPUP */
+
+setTimeout(()=>{
+
+document.getElementById("popup").classList.add("show");
+
+},1000);
+
+</script>
+
+</body>
+</html>
